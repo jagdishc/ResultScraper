@@ -81,7 +81,7 @@ public class ResultScraper
                    System.out.println(nam);
                    names.put(regno, nam);
                }
-               if(i==3)
+               else if(i==3)
                {
                    Element ele = result.child(0);
                    int len = ele.children().size();

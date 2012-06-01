@@ -3,6 +3,7 @@ package resultscraper;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.InputStreamReader;
@@ -81,7 +82,7 @@ public class ResultScraper
                    System.out.println(nam);
                    names.put(regno, nam);
                }
-               if(i==3)
+               else if(i==3)
                {
                    Element ele = result.child(0);
                    int len = ele.children().size();
@@ -157,15 +158,35 @@ public class ResultScraper
     public static void main(String[] args) 
     {
         ResultScraper rs = new ResultScraper();
-        for(int i=1071726;i<=1071847;i++)
+        int start, end;
+        String reg, splits[], delimiter=":";
+        try
         {
-            rs.doScrape(i);
+            BufferedReader br = new BufferedReader(new FileReader("G:\\Java\\ResultScraper\\src\\resultscraper\\regno.txt"));            
+            while((reg = br.readLine())!=null)
+            {
+                splits = reg.split(delimiter);
+                start = Integer.parseInt(splits[0]);
+                end = Integer.parseInt(splits[1]);
+                for(int i=start;i<=end;i++)
+                {
+                    rs.doScrape(i);
+                }               
+                rs.writeToFile();
+            }
         }
-        for(int i=1104553;i<=1104574;i++)
+        catch(NumberFormatException nf)
         {
-             rs.doScrape(i);
+            System.out.println("Edit the regno.txtfile properly");
+        }        
+        catch(FileNotFoundException fnf)
+        {
+            System.out.println("Enter the filename or path properly");
         }
-        rs.doScrape(1014712);
-        rs.writeToFile();
+        catch(Exception e)
+        {
+            e.printStackTrace();
+        }
+        
     }
 }

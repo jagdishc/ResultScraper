@@ -1,0 +1,4 @@
+//Format 1071726:1071847	continuous numbers
+// 1104553:1104574			continuous numbers
+// 1104553:1104553			single number
+//Remove these lines before executing the program

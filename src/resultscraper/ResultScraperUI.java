@@ -1,23 +1,19 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
-
-/*
- * ResultScraperUI.java
- *
- * Created on Jun 1, 2012, 7:32:04 PM
- */
 package resultscraper;
 
+import com.thoughtworks.xstream.XStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.ObjectInputStream;
 import java.math.BigInteger;
+import javax.swing.JFileChooser;
+import resultscraper.Regulation2008;
 
 /**
  *
  * @author Jagdish
  */
 public class ResultScraperUI extends javax.swing.JFrame {
-
+    public Regulation2008 regulation;
     /** Creates new form ResultScraperUI */
     public ResultScraperUI() {
         initComponents();
@@ -43,16 +39,21 @@ public class ResultScraperUI extends javax.swing.JFrame {
         addBtn = new javax.swing.JButton();
         getResultsBtn = new javax.swing.JButton();
         jLabel4 = new javax.swing.JLabel();
+        creditsTxt = new javax.swing.JTextField();
+        jLabel5 = new javax.swing.JLabel();
+        locationLbl = new javax.swing.JLabel();
+        locationTxt = new javax.swing.JTextField();
+        locationBtn = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
-        jLabel1.setFont(new java.awt.Font("Tahoma", 1, 18)); // NOI18N
-        jLabel1.setText("Add Current Sem Subjects:");
+        jLabel1.setFont(new java.awt.Font("Tahoma", 1, 12));
+        jLabel1.setText("Add Current Sem Subject codes and Credits:");
 
-        jLabel2.setFont(new java.awt.Font("Tahoma", 1, 14)); // NOI18N
+        jLabel2.setFont(new java.awt.Font("Tahoma", 1, 14));
         jLabel2.setText("Start Number:");
 
-        jLabel3.setFont(new java.awt.Font("Tahoma", 1, 14)); // NOI18N
+        jLabel3.setFont(new java.awt.Font("Tahoma", 1, 14));
         jLabel3.setText("End Number:");
 
         addBtn.setText("Add");
@@ -69,59 +70,104 @@ public class ResultScraperUI extends javax.swing.JFrame {
             }
         });
 
-        jLabel4.setFont(new java.awt.Font("Tahoma", 1, 24)); // NOI18N
+        jLabel4.setFont(new java.awt.Font("Tahoma", 1, 24));
         jLabel4.setText("Regulation 2008 results");
+
+        jLabel5.setFont(new java.awt.Font("Tahoma", 1, 10));
+        jLabel5.setForeground(new java.awt.Color(255, 0, 0));
+        jLabel5.setText("(Add one by one)");
+
+        locationLbl.setFont(new java.awt.Font("Tahoma", 1, 14)); // NOI18N
+        locationLbl.setText("Location:");
+
+        locationBtn.setText("...");
+        locationBtn.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                locationBtnActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addGap(47, 47, 47)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 252, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addGroup(layout.createSequentialGroup()
-                        .addComponent(jLabel2)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(startNumberTxt, javax.swing.GroupLayout.PREFERRED_SIZE, 117, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addGap(18, 18, 18)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                        .addGap(111, 111, 111)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                .addGroup(layout.createSequentialGroup()
+                                    .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 291, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                        .addGroup(layout.createSequentialGroup()
+                                            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                                .addGroup(layout.createSequentialGroup()
+                                                    .addComponent(jLabel3)
+                                                    .addGap(18, 18, 18)
+                                                    .addComponent(endNumberTxt, javax.swing.GroupLayout.PREFERRED_SIZE, 113, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                                .addGroup(layout.createSequentialGroup()
+                                                    .addComponent(subjectsTxt, javax.swing.GroupLayout.PREFERRED_SIZE, 114, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                                    .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                                    .addComponent(creditsTxt, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                                    .addGap(18, 18, 18)
+                                                    .addComponent(addBtn))))
+                                        .addGroup(layout.createSequentialGroup()
+                                            .addGap(74, 74, 74)
+                                            .addComponent(jLabel5))))
+                                .addGroup(layout.createSequentialGroup()
+                                    .addGap(31, 31, 31)
+                                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                        .addComponent(jLabel2)
+                                        .addComponent(locationLbl))
+                                    .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                        .addGroup(layout.createSequentialGroup()
+                                            .addComponent(locationTxt, javax.swing.GroupLayout.PREFERRED_SIZE, 193, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                            .addGap(50, 50, 50)
+                                            .addComponent(locationBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                        .addComponent(startNumberTxt, javax.swing.GroupLayout.PREFERRED_SIZE, 117, javax.swing.GroupLayout.PREFERRED_SIZE))))
+                            .addGroup(javax.swing.GroupLayout.Alignment.LEADING, layout.createSequentialGroup()
+                                .addGap(256, 256, 256)
+                                .addComponent(getResultsBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 114, javax.swing.GroupLayout.PREFERRED_SIZE))))
                     .addGroup(layout.createSequentialGroup()
-                        .addComponent(jLabel3)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(endNumberTxt))
-                    .addComponent(subjectsTxt, javax.swing.GroupLayout.PREFERRED_SIZE, 217, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(55, 55, 55)
-                .addComponent(addBtn)
-                .addContainerGap(60, Short.MAX_VALUE))
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                .addContainerGap(307, Short.MAX_VALUE)
-                .addComponent(getResultsBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 114, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(279, 279, 279))
-            .addGroup(layout.createSequentialGroup()
-                .addGap(193, 193, 193)
-                .addComponent(jLabel4, javax.swing.GroupLayout.PREFERRED_SIZE, 299, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(208, Short.MAX_VALUE))
+                        .addGap(250, 250, 250)
+                        .addComponent(jLabel4, javax.swing.GroupLayout.PREFERRED_SIZE, 299, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addContainerGap(194, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
-                .addGap(37, 37, 37)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                .addGap(53, 53, 53)
                 .addComponent(jLabel4, javax.swing.GroupLayout.PREFERRED_SIZE, 38, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(48, 48, 48)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 55, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(subjectsTxt, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(addBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 36, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(85, 85, 85)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel2, javax.swing.GroupLayout.PREFERRED_SIZE, 49, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(startNumberTxt, javax.swing.GroupLayout.PREFERRED_SIZE, 36, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jLabel3, javax.swing.GroupLayout.PREFERRED_SIZE, 26, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(endNumberTxt, javax.swing.GroupLayout.PREFERRED_SIZE, 33, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 61, Short.MAX_VALUE)
-                .addComponent(getResultsBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 44, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(59, 59, 59))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(layout.createSequentialGroup()
+                        .addGap(47, 47, 47)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 55, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(subjectsTxt, javax.swing.GroupLayout.PREFERRED_SIZE, 28, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(creditsTxt, javax.swing.GroupLayout.PREFERRED_SIZE, 28, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(addBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 36, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addGap(33, 33, 33)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(jLabel2, javax.swing.GroupLayout.PREFERRED_SIZE, 49, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(startNumberTxt, javax.swing.GroupLayout.PREFERRED_SIZE, 36, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jLabel3, javax.swing.GroupLayout.PREFERRED_SIZE, 26, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(endNumberTxt, javax.swing.GroupLayout.PREFERRED_SIZE, 39, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 33, Short.MAX_VALUE)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(locationLbl)
+                            .addComponent(locationTxt, javax.swing.GroupLayout.PREFERRED_SIZE, 29, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(locationBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 26, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addGap(49, 49, 49)
+                        .addComponent(getResultsBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 44, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(layout.createSequentialGroup()
+                        .addGap(93, 93, 93)
+                        .addComponent(jLabel5, javax.swing.GroupLayout.PREFERRED_SIZE, 21, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 225, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addGap(42, 42, 42))
         );
 
         pack();
@@ -129,18 +175,59 @@ public class ResultScraperUI extends javax.swing.JFrame {
 
 private void addBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_addBtnActionPerformed
     String subject = subjectsTxt.getText().toString();
-    if((!regulation.subjects.containsKey(subject)) && (!subject.equals(""))){
-        regulation.subjects.put(subject, Boolean.TRUE);
-        System.out.println(subject);
+    String credits = creditsTxt.getText().toString();
+    if((!subject.isEmpty())&&(!credits.isEmpty())){
+        if((!regulation.subjects.containsKey(subject)) && (!subject.equals(""))){
+            regulation.subjects.put(subject, Integer.parseInt(credits));
+            System.out.println(subject);
+            subjectsTxt.setText("");
+            creditsTxt.setText("");
+        }
+    }else{
+        System.out.println("Enter the subject and credits");
     }
 }//GEN-LAST:event_addBtnActionPerformed
 
 private void getResultsBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_getResultsBtnActionPerformed
-    BigInteger stNo = BigInteger.valueOf(Long.parseLong(startNumberTxt.getText()));
-    BigInteger eNo = BigInteger.valueOf(Long.parseLong(endNumberTxt.getText()));
-    regulation.startNumber = stNo;
-    regulation.endNumber = eNo;
+    String s = startNumberTxt.getText();
+    String e = endNumberTxt.getText();
+    if((!s.isEmpty()) && (!e.isEmpty())){
+        BigInteger stNo = BigInteger.valueOf(Long.parseLong(s));
+        BigInteger eNo = BigInteger.valueOf(Long.parseLong(e));
+        regulation.startNumber = stNo;
+        regulation.endNumber = eNo;
+        regulation.getResults();
+        try{
+            FileInputStream fin = new FileInputStream(new File("data.dat"));
+            ObjectInputStream obin = new ObjectInputStream(fin);            
+            Regulation2008 reg = (Regulation2008)obin.readObject();
+            System.out.println(reg);
+            obin.close();
+        }catch(Exception ex){
+            ex.printStackTrace();
+        }
+    }else {
+        System.out.println("Enter the start and end register number");
+    }
 }//GEN-LAST:event_getResultsBtnActionPerformed
+
+private void locationBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_locationBtnActionPerformed
+    class MyFilter extends javax.swing.filechooser.FileFilter {
+        public boolean accept(File file) {
+            String filename = file.getName();
+            return filename.endsWith(".csv");
+        }
+        public String getDescription() {
+            return "*.csv";
+        }
+        }
+        JFileChooser fc = new JFileChooser();    
+        fc.addChoosableFileFilter(new MyFilter());      
+        int reval = fc.showOpenDialog(fc);
+        if(reval == JFileChooser.APPROVE_OPTION){
+            locationTxt.setText(fc.getSelectedFile().toString());
+        }
+}//GEN-LAST:event_locationBtnActionPerformed
 
     /**
      * @param args the command line arguments
@@ -177,15 +264,20 @@ private void getResultsBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN
             }
         });
     }
-    public Regulation2008 regulation;
+    
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton addBtn;
+    private javax.swing.JTextField creditsTxt;
     private javax.swing.JTextField endNumberTxt;
     private javax.swing.JButton getResultsBtn;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
+    private javax.swing.JLabel jLabel5;
+    private javax.swing.JButton locationBtn;
+    private javax.swing.JLabel locationLbl;
+    private javax.swing.JTextField locationTxt;
     private javax.swing.JTextField startNumberTxt;
     private javax.swing.JTextField subjectsTxt;
     // End of variables declaration//GEN-END:variables

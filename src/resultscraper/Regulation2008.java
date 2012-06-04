@@ -3,11 +3,18 @@ package resultscraper;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.InputStreamReader;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.OutputStreamWriter;
+import java.io.Serializable;
 import java.math.BigInteger;
 import java.net.URL;
 import java.net.URLConnection;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import org.jsoup.Jsoup;
@@ -15,26 +22,47 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
-public class Regulation2008 {
+public class Regulation2008 implements Serializable{
     HashMap<String,HashMap<String,String>> results;
-    HashMap<String,Boolean> subjects;
+    HashMap<String,Integer> subjects;
+    HashMap<String, Integer> otherSemSubjects;
     HashMap<String,String> corpus;
     BigInteger startNumber;
     BigInteger endNumber;
     String url;
     public Regulation2008(){
         results = new HashMap<String,HashMap<String,String>>();
-        subjects = new HashMap<String,Boolean>();
+        subjects = new HashMap<String,Integer>();
+        otherSemSubjects = new HashMap<String, Integer>();
         corpus = new HashMap<String,String>();
         startNumber = BigInteger.valueOf(0);
         endNumber = BigInteger.valueOf(0);
-        url = "result.annauniv.edu/cgi-bin/result/result12gr.pl?regno=";
+        //url = "http://result.annauniv.edu/cgi-bin/result/firstsemgr.pl";
+        url = "http://result.annauniv.edu/cgi-bin/result/result11gr.pl?regno=";
+    }
+    public Regulation2008(HashMap<String,HashMap<String,String>>res,HashMap<String,Integer>sub,HashMap<String,String>cor,BigInteger s,BigInteger e,String u){
+        results = res;
+        subjects = sub;
+        corpus = cor;
+        startNumber = s;
+        endNumber = e;
+        url = u;
+    }
+    public String toString(){
+        return "results: "+results+"\nsubjects: "+subjects+"\ncorpus: "+corpus+"\nstart: "+startNumber+"\nend: "+endNumber+"\nurl: "+url;
     }
     public void crawl(String no){
         try{
-            url += no;
-            URL link = new URL(url);
-            link.openConnection();
+            //String data = "regno="+no;
+            String data = no;
+            URL link = new URL(url+data);
+            //URLConnection conn = link.openConnection();
+            //conn.setDoOutput(true);
+            //conn.setDoInput(true);
+            //OutputStreamWriter wr = new OutputStreamWriter(conn.getOutputStream());
+            //wr.write(data);
+            //wr.flush();
+            //BufferedReader br = new BufferedReader(new InputStreamReader(conn.getInputStream()));
             BufferedReader br = new BufferedReader(new InputStreamReader(link.openStream()));
             String line, html = "";
             while((line = br.readLine())!=null){
@@ -51,9 +79,10 @@ public class Regulation2008 {
     }
     public void scrape(String html, String no){
         try{
+            //html = Jsoup.clean(html, null);
             Document doc = Jsoup.parse(html);
             Elements table = doc.select("table");
-            int i = 0;
+            int i = 0;           
             HashMap<String, String> temp = new HashMap<String, String>();
             for(Element resultTable : table){
                 if(i == 0){
@@ -71,6 +100,10 @@ public class Regulation2008 {
                             continue;
                         }else {
                             String code = element.child(0).text().trim();
+                            if((!subjects.containsKey(code)) && (!otherSemSubjects.containsKey(code))){
+                                int credit = Integer.parseInt(element.child(1).text().trim());
+                                otherSemSubjects.put(code, credit);
+                            }
                             String grade = element.child(2).text().trim();
                             if(!temp.containsKey(code)){
                                 temp.put(code, grade);
@@ -82,17 +115,18 @@ public class Regulation2008 {
                         results.put(no, temp);
                     }
                 }
+                break;
             }
         }catch(Exception ex){
             ex.printStackTrace();
         }
     }
     public void printCurrentSem(){
-        try{
+        try{            
             HashMap<String,String> result;
-            File file = new File("Result8thsem.csv");
-            BufferedWriter bw = new BufferedWriter(new FileWriter(file));
-            String subjectscsv = "Regno/subjects,";
+            File file = new File("Result7thsem.csv");
+            BufferedWriter bw = new BufferedWriter(new FileWriter(file, true));
+            String subjectscsv = "Regno/subjects,Name,";
             for(Iterator<String>iter = subjects.keySet().iterator();iter.hasNext();){
                 String sub = iter.next();
                 subjectscsv += sub+",";
@@ -100,21 +134,25 @@ public class Regulation2008 {
             bw.write(subjectscsv);
             bw.write("\n");
             bw.flush();
-            for(Iterator<String>it = results.keySet().iterator();it.hasNext();){
-                String reg = it.next();
-                result = results.get(reg);
-                String txtToPrint = reg+",";
-                for(Iterator<String>iter = result.keySet().iterator();iter.hasNext();){
-                    String code = iter.next();
-                    if(subjects.containsKey(code)){
-                        String res = result.get(code);
-                        txtToPrint += res+",";                       
-                    }                    
+            BigInteger incr = BigInteger.valueOf(1);  
+            for( BigInteger counter = startNumber;;counter = counter.add(incr)){
+                if((endNumber.compareTo(counter) == -1)){
+                    break;
                 }
-                bw.write(txtToPrint+"\n");
-                bw.flush();
-                bw.close();
+            String no = counter.toString();
+            result = results.get(no);
+            String txtToPrint = no+",";
+            String name = result.get("Name");
+            txtToPrint += name+",";
+            for(Iterator<String>iter = subjects.keySet().iterator();iter.hasNext();){
+                String code = iter.next();
+                String res = result.get(code);
+                txtToPrint += res+",";                                    
             }
+            bw.write(txtToPrint+"\n");
+            bw.flush();             
+            }
+            bw.close();
         }catch(Exception ex){
             ex.printStackTrace();
         }
@@ -122,24 +160,35 @@ public class Regulation2008 {
     public void printOtherSems(){
         try{
             HashMap<String,String> result;
-            File file = new File("Result8_other_sem.csv");
-            BufferedWriter bw = new BufferedWriter(new FileWriter(file));
-            bw.write("Regno,Subject,Grade\n");
-            bw.flush();
-            
-            for(Iterator<String>it = results.keySet().iterator();it.hasNext();){
-                String reg = it.next();
-                result = results.get(reg);                
-                for(Iterator<String>iter = result.keySet().iterator();iter.hasNext();){
-                    String txtToPrint = reg+",";
-                    String code = iter.next();
-                    if(!subjects.containsKey(code)){
-                        String res = result.get(code);
-                        txtToPrint += code+","+res+"\n";
-                        bw.write(txtToPrint);
-                    }
+            ArrayList<String> order = new ArrayList<String>();
+            File file = new File("Result7_other_sem.csv");
+            BufferedWriter bw = new BufferedWriter(new FileWriter(file, true));
+            String subjectscsv = "Regno/subjects,Name,";
+            for(Iterator<String>iter = otherSemSubjects.keySet().iterator();iter.hasNext();){
+                String sub = iter.next();
+                order.add(sub);
+                subjectscsv += sub+",";
+            }
+            bw.write(subjectscsv);
+            bw.write("\n");
+            bw.flush();            
+            BigInteger incr = BigInteger.valueOf(1);  
+            for( BigInteger counter = startNumber;;counter = counter.add(incr)){
+                if((endNumber.compareTo(counter) == -1)){
+                    break;
                 }
-                bw.flush();
+            String no = counter.toString();
+            result = results.get(no);
+            String txtToPrint = no+",";
+            String name = result.get("Name");
+            txtToPrint += name+",";
+            for(Iterator<String>iter = otherSemSubjects.keySet().iterator();iter.hasNext();){
+                String code = iter.next();                
+                String res = result.get(code);
+                txtToPrint += res+",";                                  
+            }
+            bw.write(txtToPrint+"\n");
+            bw.flush();             
             }
             bw.close();
         }catch(Exception ex){
@@ -148,14 +197,25 @@ public class Regulation2008 {
     }
     public void getResults(){
         BigInteger incr = BigInteger.valueOf(1);       
-        for( BigInteger counter = startNumber;;counter.add(incr)){
+        for( BigInteger counter = startNumber;;counter = counter.add(incr)){
             if((endNumber.compareTo(counter) == -1)){
                 break;
             }
+            System.out.println(counter);
             String no = counter.toString();
             crawl(no);            
         }
-       printCurrentSem();
-       printOtherSems();
+       printCurrentSem();       
+       printOtherSems(); 
+        try{
+            FileOutputStream fos = new FileOutputStream(new File("data.dat"));
+            ObjectOutputStream obj = new ObjectOutputStream(fos);
+            obj.writeObject(this);
+            obj.flush();
+            obj.close();            
+            
+        }catch(Exception e){
+            e.printStackTrace();
+        }
     }
 }
